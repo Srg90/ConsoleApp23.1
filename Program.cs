@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,14 +12,13 @@ namespace ConsoleApp23._1
         static int n1;
         static int n;
         static int[] number;
-        public static void Main()
+        static void Main()
         {
             Start();
-            Task.Run(() => FactorialMenu());
-            
-            Console.ReadKey();
+            Task.Run(() => FactorialWrapp());
+            Thread.CurrentThread.Join();
         }
-        public static void Start()
+        static void Start()
         {
         Start1:
             try
@@ -47,7 +46,7 @@ namespace ConsoleApp23._1
             }
         }
 
-        public static void Factorial1()
+        static void Factorial1()
         {
             Console.WriteLine("Factorial1 начал работу");
             n1 = n;
@@ -63,10 +62,10 @@ namespace ConsoleApp23._1
             }
             Console.WriteLine("Factorial1 окончил работу");
         }
-        public static void Factorial2()
+        static void Factorial2()
         {
             Console.WriteLine("Factorial2 начал работу");
-            Thread.Sleep(100);
+            Thread.Sleep(300);
             List<int> factorial = new List<int>();
             for (int i = 1; i < number.Length; i++)
             {
@@ -74,7 +73,6 @@ namespace ConsoleApp23._1
                 int f = n *= i;
                 factorial.Add(f);
                 Console.Write(" = ");
-                //Console.Write("{0, 2} ", i);
                 Console.WriteLine("{0, 2} ", f);
                 Thread.Sleep(1200);
             }
@@ -83,53 +81,57 @@ namespace ConsoleApp23._1
             Console.WriteLine();
             Console.WriteLine("Factorial2 окончил работу");
         }
-        public static async Task Factorial2Async()
+        static async Task Factorial2Async()
         {
-            
             Console.WriteLine("Factorial2Async начал работу");
             await Task.Run(() => Factorial2());
             Console.WriteLine("Factorial2Async окончил работу");
-            
         }
-        public static async Task Factorial1Async()
+        static async Task Factorial1Async()
         {
             Console.WriteLine("Factorial1Async начал работу");
             await Task.Run(() => Factorial1());
             Console.WriteLine("Factorial1Async окончил работу");
         }
-        public static async Task FactorialMenu()
+        static async void FactorialWrapp()
         {
             await Task.WhenAll(Factorial1Async(), Factorial2Async());
             Console.WriteLine();
-            Thread.Sleep(500);
-            
+            Task task3 = new Task(() => ReturnMenu());
+            task3.Start();
         }
-    }
-    class Menu
-    {
-        public static Task ReturnMenu()
+        static Task ReturnMenu()
         {
             Console.WriteLine("Вычислить факториал другого числа?");
-            Console.WriteLine("     1. Да");
-            Console.WriteLine("     2. Нет");
+            Console.WriteLine("     1. Да (продолжить)");
+            Console.WriteLine("     2. Нет (закрыть)");
             Console.WriteLine();
-
         Start2:
             Console.Write("Ваш выбор: ");
-            int choice = Convert.ToInt32(Console.ReadLine());
-            switch (choice)
+            try
             {
-                case 1:
+                int choice = Convert.ToInt32(Console.ReadLine());
+                if (choice == 1)
+                {
                     Console.WriteLine();
                     Program.Main();
-                    break;
-                case 2:
+                }
+                else if (choice == 2)
+                {
                     Environment.Exit(0);
-                    break;
-                default:
+                }
+                else
+                {
                     Console.WriteLine("Такого параметра не существует!");
                     Console.WriteLine();
                     goto Start2;
+                }
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Такого параметра не существует!");
+                Console.WriteLine();
+                goto Start2;
             }
             return Task.CompletedTask;
         }
